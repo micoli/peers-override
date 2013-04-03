@@ -19,102 +19,39 @@
 
 package net.sourceforge.peers;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import net.sourceforge.peers.sip.Utils;
 
 public class Logger {
+	private org.apache.log4j.Logger log4j;
 
-	public static String LOG_FILE = File.separator + "logs" + File.separator + "peers.log";
-	public static String NETWORK_FILE = File.separator + "logs" + File.separator + "transport.log";
+	public Logger(String loggerName) {
+		log4j = org.apache.log4j.Logger.getLogger(loggerName);
+	}
 
-	private PrintWriter logWriter;
-	private PrintWriter networkWriter;
-	private Object logMutex;
-	private Object networkMutex;
-	private SimpleDateFormat logFormatter;
-	private SimpleDateFormat networkFormatter;
+	public final org.apache.log4j.Logger getLogger() {
+		return log4j;
+	}
 
-	public Logger(String peersHome) {
-		if (peersHome == null) {
-			peersHome = Utils.DEFAULT_PEERS_HOME;
-		}
-		try {
-			logWriter = new PrintWriter(new BufferedWriter(new FileWriter(peersHome + LOG_FILE)));
-			networkWriter = new PrintWriter(new BufferedWriter(new FileWriter(peersHome + NETWORK_FILE)));
-		} catch (IOException e) {
-			System.out.println("logging to stdout");
-			logWriter = new PrintWriter(System.out);
-			networkWriter = new PrintWriter(System.out);
-		}
-		logMutex = new Object();
-		networkMutex = new Object();
-		logFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS");
-		networkFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS");
+	public final void setLogger(org.apache.log4j.Logger log4j) {
+		this.log4j = log4j;
 	}
 
 	public void debug(String message) {
-		synchronized (logMutex) {
-			logWriter.write(genericLog(message.toString(), "DEBUG"));
-			logWriter.flush();
-		}
+		log4j.debug(message);
 	}
 
 	public void info(String message) {
-		synchronized (logMutex) {
-			logWriter.write(genericLog(message.toString(), "INFO "));
-			logWriter.flush();
-		}
+		log4j.info(message);
 	}
 
 	public void error(String message) {
-		synchronized (logMutex) {
-			logWriter.write(genericLog(message.toString(), "ERROR"));
-			logWriter.flush();
-		}
+		log4j.error(message);
 	}
 
 	public void error(String message, Exception exception) {
-		synchronized (logMutex) {
-			logWriter.write(genericLog(message, "ERROR"));
-			exception.printStackTrace(logWriter);
-			logWriter.flush();
-		}
-	}
-
-	private String genericLog(String message, String level) {
-		StringBuffer buf = new StringBuffer();
-		buf.append(logFormatter.format(new Date()));
-		buf.append(" ");
-		buf.append(level);
-		buf.append(" [");
-		buf.append(Thread.currentThread().getName());
-		buf.append("] ");
-		buf.append(message);
-		buf.append("\n");
-		return buf.toString();
+		log4j.error(message, exception);
 	}
 
 	public void traceNetwork(String message, String direction) {
-		synchronized (networkMutex) {
-			StringBuffer buf = new StringBuffer();
-			buf.append(networkFormatter.format(new Date()));
-			buf.append(" ");
-			buf.append(direction);
-			buf.append(" [");
-			buf.append(Thread.currentThread().getName());
-			buf.append("]\n\n");
-			buf.append(message);
-			buf.append("\n");
-			networkWriter.write(buf.toString());
-			networkWriter.flush();
-		}
+		log4j.info(direction + "[" + Thread.currentThread().getName() + "]" + message);
 	}
-
 }
