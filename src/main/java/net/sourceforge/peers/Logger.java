@@ -19,39 +19,82 @@
 
 package net.sourceforge.peers;
 
+import org.slf4j.LoggerFactory;
 
 public class Logger {
-	private org.apache.log4j.Logger log4j;
+	public static enum Level {
+		OFF, INFO, ERROR, DEBUG
+	}
+
+	Level level = Level.INFO;
+
+	private org.slf4j.Logger logger;
 
 	public Logger(String loggerName) {
-		log4j = org.apache.log4j.Logger.getLogger(loggerName);
+		logger = LoggerFactory.getLogger(loggerName);
 	}
 
-	public final org.apache.log4j.Logger getLogger() {
-		return log4j;
+	public final org.slf4j.Logger getLogger() {
+		return logger;
 	}
 
-	public final void setLogger(org.apache.log4j.Logger log4j) {
-		this.log4j = log4j;
+	public final void setLogger(org.slf4j.Logger logger) {
+		this.logger = logger;
+	}
+
+	public final void setLevel(Level level) {
+		this.level = level;
 	}
 
 	public void debug(String message) {
-		log4j.debug(message);
+		switch (level) {
+		case OFF:
+			break;
+		case ERROR:
+		case INFO:
+		case DEBUG:
+			logger.debug(message);
+			break;
+		}
 	}
 
 	public void info(String message) {
-		log4j.info(message);
+		switch (level) {
+		case OFF:
+			break;
+		case ERROR:
+		case INFO:
+		case DEBUG:
+			logger.debug(message);
+			break;
+		}
 	}
 
 	public void error(String message) {
-		log4j.error(message);
+		switch (level) {
+		case OFF:
+			break;
+		case ERROR:
+		case INFO:
+		case DEBUG:
+			logger.debug(message);
+			break;
+		}
 	}
 
 	public void error(String message, Exception exception) {
-		log4j.error(message, exception);
+		switch (level) {
+		case OFF:
+			break;
+		case ERROR:
+		case INFO:
+		case DEBUG:
+			logger.error(message, exception);
+			break;
+		}
 	}
 
 	public void traceNetwork(String message, String direction) {
-		log4j.info(direction + "[" + Thread.currentThread().getName() + "]" + message);
+		info(direction + "[" + Thread.currentThread().getName() + "]" + message);
 	}
 }
